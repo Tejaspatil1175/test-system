@@ -97,18 +97,18 @@ Commit: `feat(backend): basic express server skeleton` [x]
 
 ---
 
-## Step 3: MongoDB Atlas Connection
+## Step 3: MongoDB Atlas Connection [DONE]
 
 Task:
 1. Create a free MongoDB Atlas account and free M0 cluster (manual step
-   outside the IDE, done by you in the browser).
-2. Create a database user and whitelist IP `0.0.0.0/0`.
-3. Copy the connection string into `backend/.env` as `MONGO_URI`.
+   outside the IDE, done by you in the browser). [x]
+2. Create a database user and whitelist IP `0.0.0.0/0`. [x]
+3. Copy the connection string into `backend/.env` as `MONGO_URI`. [x]
 4. Create `backend/config/db.js` exporting `connectDB()` that connects
-   using mongoose, logs success, or exits process on failure.
-5. Call `connectDB()` in `server.js` before `app.listen`.
+   using mongoose, logs success, or exits process on failure. [x]
+5. Call `connectDB()` in `server.js` before `app.listen`. [x]
 
-Commit: `feat(backend): mongodb atlas connection setup`
+Commit: `feat(backend): mongodb atlas connection setup` [x]
 
 ---
 

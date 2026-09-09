@@ -1,15 +1,28 @@
 # MCQ Test System - Implementation Guide
 
-MERN stack MCQ test platform with admin panel, team login, 1-hour timer,
-auto-ranking (score first, time second), and PDF result generation.
+<div align="center">
+
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![NodeJS](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white)
+
+</div>
+
+MERN stack MCQ test platform with admin panel, team login, 1-hour timer, auto-ranking (score first, time second), and PDF result generation.
 
 ## Tech Stack
 
-- Frontend: React
-- Backend: Node.js + Express
-- Database: MongoDB Atlas (free M0 tier)
-- Auth: JWT
-- PDF: pdfkit (or puppeteer)
+| Layer | Technology |
+|---|---|
+| **Frontend** | React, React Router, Axios |
+| **Backend** | Node.js, Express.js |
+| **Database** | MongoDB Atlas (Mongoose ODM) |
+| **Authentication** | JSON Web Token (JWT), Bcrypt.js |
+| **Document Generation** | PDFKit |
+| **Tooling & Dev** | Nodemon, Dotenv, Cors |
+
 
 ## Folder Structure
 

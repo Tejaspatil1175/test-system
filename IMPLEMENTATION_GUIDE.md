@@ -66,34 +66,34 @@ Now proceed to Step 1.
 
 ---
 
-## Step 1: Root Project Setup
+## Step 1: Root Project Setup [DONE]
 
 Task:
-1. Create root folder `mcq-test-system`.
+1. Create root folder `mcq-test-system`. [x]
 2. Add a `.gitignore` file in root excluding: `backend/node_modules/`,
    `frontend/node_modules/`, `backend/.env`, `frontend/.env`,
-   `frontend/build/`, `*.log`, `.DS_Store`, `.vscode/`, `.idea/`.
-3. Run `git init` in root, then `git add .gitignore` and commit.
-4. Create empty folders `backend/` and `frontend/` inside root.
+   `frontend/build/`, `*.log`, `.DS_Store`, `.vscode/`, `.idea/`. [x]
+3. Run `git init` in root, then `git add .gitignore` and commit. [x]
+4. Create empty folders `backend/` and `frontend/` inside root. [x]
 
-Commit: `chore: init repo with gitignore and folder structure`
+Commit: `chore: init repo with gitignore and folder structure` [x]
 
 ---
 
-## Step 2: Backend Skeleton
+## Step 2: Backend Skeleton [DONE]
 
 Task:
-1. Inside `backend/`, run `npm init -y`.
-2. Install: `express mongoose bcryptjs jsonwebtoken dotenv cors`.
-3. Install dev dependency: `nodemon`.
+1. Inside `backend/`, run `npm init -y`. [x]
+2. Install: `express mongoose bcryptjs jsonwebtoken dotenv cors`. [x]
+3. Install dev dependency: `nodemon`. [x]
 4. Create `backend/server.js`: Express app, `cors()`, `express.json()`
    middleware, a `GET /` route returning `{status: "ok"}`, and
-   `app.listen(process.env.PORT || 5000)`.
-5. Create `backend/.env` with `PORT=5000`, `MONGO_URI=`, `JWT_SECRET=`.
+   `app.listen(process.env.PORT || 5000)`. [x]
+5. Create `backend/.env` with `PORT=5000`, `MONGO_URI=`, `JWT_SECRET=`. [x]
 6. Add `"dev": "nodemon server.js"` and `"start": "node server.js"`
-   scripts to `backend/package.json`.
+   scripts to `backend/package.json`. [x]
 
-Commit: `feat(backend): basic express server skeleton`
+Commit: `feat(backend): basic express server skeleton` [x]
 
 ---
 

@@ -42,3 +42,7 @@ Thumbs.db
 *.sln
 *.sw?
 
+# Local Documentation / Guides
+IMPLEMENTATION_GUIDE.md
+
+

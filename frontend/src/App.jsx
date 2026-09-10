@@ -9,9 +9,9 @@ import ManageQuestions from './pages/ManageQuestions';
 import ViewResults from './pages/ViewResults';
 import TeamLogin from './pages/TeamLogin';
 import TestPage from './pages/TestPage';
+import SubmittedPage from './pages/SubmittedPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
-const SubmittedPage = () => <div className="glass-card">Submitted Page Placeholder</div>;
 
 
 

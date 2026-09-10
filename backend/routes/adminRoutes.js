@@ -8,6 +8,7 @@ const {
   deleteQuestion,
   calculateResults,
   getResults,
+  downloadTeamPdf,
 } = require('../controllers/adminController');
 const verifyToken = require('../middleware/auth');
 const isAdmin = require('../middleware/isAdmin');
@@ -22,7 +23,10 @@ router.delete('/questions/:id', verifyToken, isAdmin, deleteQuestion);
 router.post('/calculate-results', verifyToken, isAdmin, calculateResults);
 router.get('/results', verifyToken, isAdmin, getResults);
 
+router.get('/pdf/:teamId', verifyToken, isAdmin, downloadTeamPdf);
+
 module.exports = router;
+
 
 
 

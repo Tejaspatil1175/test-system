@@ -127,6 +127,8 @@ const deleteQuestion = async (req, res) => {
   }
 };
 
+const { generateTeamPdf } = require('../utils/generatePdf');
+
 const calculateResults = async (req, res) => {
   try {
     const questions = await Question.find();
@@ -186,6 +188,37 @@ const getResults = async (req, res) => {
   }
 };
 
+const downloadTeamPdf = async (req, res) => {
+  try {
+    const { teamId } = req.params;
+
+    const team = await Team.findById(teamId);
+    if (!team) {
+      return res.status(404).json({ message: 'Team not found' });
+    }
+
+    const submission = await Submission.findOne({ teamId });
+    if (!submission) {
+      return res.status(404).json({ message: 'No submission found for this team' });
+    }
+
+    const questions = await Question.find().sort({ _id: 1 });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${team.teamName.replace(/\s+/g, '_')}_result.pdf"`
+    );
+
+    generateTeamPdf(res, team, submission, questions);
+  } catch (error) {
+    console.error('Error downloading PDF:', error);
+    if (!res.headersSent) {
+      return res.status(500).json({ message: 'Server error generating PDF' });
+    }
+  }
+};
+
 module.exports = {
   createTeam,
   listTeams,
@@ -194,7 +227,9 @@ module.exports = {
   deleteQuestion,
   calculateResults,
   getResults,
+  downloadTeamPdf,
 };
+
 
 
 

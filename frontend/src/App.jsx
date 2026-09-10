@@ -6,13 +6,13 @@ import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import ManageTeams from './pages/ManageTeams';
 import ManageQuestions from './pages/ManageQuestions';
+import ViewResults from './pages/ViewResults';
 import ProtectedRoute from './components/ProtectedRoute';
-
-const ViewResults = () => <div className="glass-card">View Results Placeholder</div>;
 
 const TeamLogin = () => <div className="glass-card">Team Login Placeholder</div>;
 const TestPage = () => <div className="glass-card">Test Page Placeholder</div>;
 const SubmittedPage = () => <div className="glass-card">Submitted Page Placeholder</div>;
+
 
 export default function App() {
   return (

@@ -62,7 +62,7 @@ export default function AdminLogin() {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label">Admin Username</label>
+            <label className="form-label">Admin Email / Username</label>
             <div style={{ position: 'relative' }}>
               <User
                 size={18}
@@ -73,7 +73,7 @@ export default function AdminLogin() {
                 type="text"
                 className="form-input"
                 style={{ paddingLeft: '2.5rem' }}
-                placeholder="e.g. admin"
+                placeholder="Enter email or username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required

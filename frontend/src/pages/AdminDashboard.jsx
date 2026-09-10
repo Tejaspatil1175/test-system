@@ -113,7 +113,7 @@ export default function AdminDashboard() {
                     width: '50px',
                     height: '50px',
                     borderRadius: '12px',
-                    background: 'rgba(255, 255, 255, 0.05)',
+                    background: 'var(--bg-secondary)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',

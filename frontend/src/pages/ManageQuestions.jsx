@@ -177,7 +177,7 @@ export default function ManageQuestions() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.65rem',
-                  background: correctOptionIdx === idx ? 'rgba(99, 102, 241, 0.15)' : 'rgba(15, 23, 42, 0.6)',
+                  background: correctOptionIdx === idx ? 'rgba(99, 102, 241, 0.08)' : 'var(--bg-primary)',
                   padding: '0.5rem 0.75rem',
                   borderRadius: 'var(--radius-md)',
                   border: `1px solid ${correctOptionIdx === idx ? 'var(--accent-primary)' : 'var(--border-color)'}`,
@@ -236,7 +236,7 @@ export default function ManageQuestions() {
               <div
                 key={q._id}
                 style={{
-                  background: 'rgba(15, 23, 42, 0.5)',
+                  background: 'var(--bg-primary)',
                   border: '1px solid var(--border-color)',
                   borderRadius: 'var(--radius-md)',
                   padding: '1.25rem',
@@ -284,16 +284,16 @@ export default function ManageQuestions() {
                             padding: '0.45rem 0.75rem',
                             borderRadius: 'var(--radius-sm)',
                             fontSize: '0.85rem',
-                            background: isCorrect ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-                            border: `1px solid ${isCorrect ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.05)'}`,
-                            color: isCorrect ? '#6ee7b7' : 'var(--text-secondary)',
+                            background: isCorrect ? 'var(--success-bg)' : 'var(--bg-secondary)',
+                            border: `1px solid ${isCorrect ? 'rgba(5, 150, 105, 0.4)' : 'var(--border-color)'}`,
+                            color: isCorrect ? 'var(--success)' : 'var(--text-primary)',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.4rem',
                           }}
                         >
                           <span style={{ fontWeight: '600' }}>({String.fromCharCode(65 + optIdx)})</span> {opt}
-                          {isCorrect && <CheckCircle2 size={14} color="#10b981" style={{ marginLeft: 'auto' }} />}
+                          {isCorrect && <CheckCircle2 size={14} color="#059669" style={{ marginLeft: 'auto' }} />}
                         </div>
                       );
                     })}

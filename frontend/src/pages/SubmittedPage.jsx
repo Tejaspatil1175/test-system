@@ -56,7 +56,7 @@ export default function SubmittedPage() {
 
         <div
           style={{
-            background: 'rgba(15, 23, 42, 0.6)',
+            background: 'var(--bg-secondary)',
             border: '1px solid var(--border-color)',
             borderRadius: 'var(--radius-md)',
             padding: '1.25rem',
@@ -65,11 +65,11 @@ export default function SubmittedPage() {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '0.65rem',
-            color: 'var(--text-muted)',
+            color: 'var(--text-secondary)',
             fontSize: '0.9rem',
           }}
         >
-          <ShieldAlert size={18} color="#10b981" />
+          <ShieldAlert size={18} color="#059669" />
           <span>Your submission is sealed and cannot be modified.</span>
         </div>
 

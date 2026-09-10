@@ -274,7 +274,7 @@ export default function TestPage() {
       <div
         style={{
           height: '6px',
-          background: 'rgba(255, 255, 255, 0.08)',
+          background: 'var(--border-color)',
           borderRadius: '999px',
           marginBottom: '2rem',
           overflow: 'hidden',
@@ -301,14 +301,14 @@ export default function TestPage() {
               key={q._id}
               className="glass-card"
               style={{
-                border: selected ? '1px solid rgba(99, 102, 241, 0.4)' : '1px solid var(--border-color)',
+                border: selected ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem', marginBottom: '1.25rem' }}>
                 <span
                   style={{
-                    background: selected ? 'var(--accent-primary)' : 'rgba(255, 255, 255, 0.1)',
-                    color: '#ffffff',
+                    background: selected ? 'var(--accent-primary)' : 'var(--bg-secondary)',
+                    color: selected ? '#ffffff' : 'var(--text-primary)',
                     width: '32px',
                     height: '32px',
                     borderRadius: '50%',
@@ -322,7 +322,7 @@ export default function TestPage() {
                 >
                   {idx + 1}
                 </span>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: '600', lineHeight: 1.5, marginTop: '2px' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: '600', lineHeight: 1.5, marginTop: '2px', color: 'var(--text-primary)' }}>
                   {q.questionText}
                 </h3>
               </div>
@@ -342,7 +342,7 @@ export default function TestPage() {
                           gap: '0.85rem',
                           padding: '0.85rem 1.25rem',
                           borderRadius: 'var(--radius-md)',
-                          background: isSelected ? 'rgba(99, 102, 241, 0.15)' : 'rgba(15, 23, 42, 0.6)',
+                          background: isSelected ? 'rgba(99, 102, 241, 0.08)' : 'var(--bg-primary)',
                           border: `1px solid ${isSelected ? 'var(--accent-primary)' : 'var(--border-color)'}`,
                           cursor: 'pointer',
                           transition: 'all 0.2s ease',
@@ -359,7 +359,7 @@ export default function TestPage() {
                         <span style={{ fontWeight: '600', color: isSelected ? 'var(--accent-primary)' : 'var(--text-muted)' }}>
                           ({String.fromCharCode(65 + optIdx)})
                         </span>
-                        <span style={{ fontSize: '0.95rem', color: isSelected ? '#ffffff' : 'var(--text-secondary)' }}>
+                        <span style={{ fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: isSelected ? '600' : '400' }}>
                           {opt}
                         </span>
                       </label>

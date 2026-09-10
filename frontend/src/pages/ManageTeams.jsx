@@ -67,21 +67,6 @@ export default function ManageTeams() {
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <Link
-          to="/admin/dashboard"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            color: 'var(--text-secondary)',
-            fontSize: '0.9rem',
-          }}
-        >
-          <ArrowLeft size={16} /> Back to Dashboard
-        </Link>
-      </div>
-
       <div
         style={{
           display: 'flex',

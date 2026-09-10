@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 
 // Placeholders for Step 17 skeleton
 import AdminLogin from './pages/AdminLogin';
+import ProtectedRoute from './components/ProtectedRoute';
+
 const AdminDashboard = () => <div className="glass-card">Admin Dashboard Placeholder</div>;
 const ManageTeams = () => <div className="glass-card">Manage Teams Placeholder</div>;
 const ManageQuestions = () => <div className="glass-card">Manage Questions Placeholder</div>;
@@ -19,13 +21,22 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/team/login" replace />} />
             <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/teams" element={<ManageTeams />} />
-            <Route path="/admin/questions" element={<ManageQuestions />} />
-            <Route path="/admin/results" element={<ViewResults />} />
             <Route path="/team/login" element={<TeamLogin />} />
-            <Route path="/test" element={<TestPage />} />
-            <Route path="/submitted" element={<SubmittedPage />} />
+            
+            {/* Protected Admin Routes */}
+            <Route element={<ProtectedRoute requiredRole="admin" />}>
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/teams" element={<ManageTeams />} />
+              <Route path="/admin/questions" element={<ManageQuestions />} />
+              <Route path="/admin/results" element={<ViewResults />} />
+            </Route>
+
+            {/* Protected Team Routes */}
+            <Route element={<ProtectedRoute requiredRole="team" />}>
+              <Route path="/test" element={<TestPage />} />
+              <Route path="/submitted" element={<SubmittedPage />} />
+            </Route>
+
             <Route path="*" element={<Navigate to="/team/login" replace />} />
           </Routes>
         </main>
@@ -33,3 +44,4 @@ export default function App() {
     </Router>
   );
 }
+

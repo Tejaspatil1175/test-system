@@ -1,87 +1,227 @@
-import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Users, FileQuestion, Award, LogOut, ShieldCheck, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import api from '../services/api';
+import {
+  Users,
+  FileQuestion,
+  Award,
+  ArrowRight,
+  TrendingUp,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  PlusCircle,
+  ShieldAlert
+} from 'lucide-react';
 
 export default function AdminDashboard() {
-  const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    teamsCount: 0,
+    questionsCount: 0,
+    submissionsCount: 0,
+    loading: true,
+  });
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    navigate('/admin/login');
-  };
+  useEffect(() => {
+    const fetchOverview = async () => {
+      try {
+        const [teamsRes, questionsRes, resultsRes] = await Promise.allSettled([
+          api.get('/admin/teams'),
+          api.get('/admin/questions'),
+          api.get('/admin/results'),
+        ]);
+
+        setStats({
+          teamsCount: teamsRes.status === 'fulfilled' ? teamsRes.value.data.length : 0,
+          questionsCount: questionsRes.status === 'fulfilled' ? questionsRes.value.data.length : 0,
+          submissionsCount: resultsRes.status === 'fulfilled' ? resultsRes.value.data.length : 0,
+          loading: false,
+        });
+      } catch (err) {
+        setStats((prev) => ({ ...prev, loading: false }));
+      }
+    };
+
+    fetchOverview();
+  }, []);
 
   const dashboardModules = [
     {
-      title: 'Manage Teams',
-      desc: 'Create new teams, generate credentials, and view test status.',
-      icon: <Users size={28} color="#6366f1" />,
+      title: 'Candidate Teams',
+      desc: 'Register student teams, generate credentials, and monitor live test access.',
       link: '/admin/teams',
-      btnText: 'Open Teams',
-      badge: 'Teams & Accounts',
+      btnText: 'Manage Teams',
+      badge: `${stats.teamsCount} Registered`,
+      icon: <Users size={22} color="#6366f1" />,
+      accent: '#6366f1',
     },
     {
-      title: 'Manage Questions',
-      desc: 'Add, view, and delete test questions with options and correct answers.',
-      icon: <FileQuestion size={28} color="#a855f7" />,
+      title: 'Question Bank',
+      desc: 'Create, inspect, and organize MCQ questions, options, and scoring keys.',
       link: '/admin/questions',
       btnText: 'Manage Questions',
-      badge: 'Question Bank',
+      badge: `${stats.questionsCount} Active Questions`,
+      icon: <FileQuestion size={22} color="#8b5cf6" />,
+      accent: '#8b5cf6',
     },
     {
-      title: 'View Results & Leaderboard',
-      desc: 'Calculate final scores, compute rankings, and download PDF scorecards.',
-      icon: <Award size={28} color="#10b981" />,
+      title: 'Evaluation & Rankings',
+      desc: 'Calculate final grades, rank candidates, and export official PDF scorecards.',
       link: '/admin/results',
       btnText: 'View Leaderboard',
-      badge: 'Evaluation',
+      badge: `${stats.submissionsCount} Evaluated`,
+      icon: <Award size={22} color="#10b981" />,
+      accent: '#10b981',
     },
   ];
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-      {/* Page Header Banner */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '2rem',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-          <div
+    <div style={{ maxWidth: '1150px', margin: '0 auto' }}>
+      {/* Page Header */}
+      <div style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '0.5rem' }}>
+          <span
             style={{
-              width: '46px',
-              height: '46px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 14px rgba(99, 102, 241, 0.3)',
+              fontSize: '0.72rem',
+              fontWeight: '700',
+              padding: '2px 8px',
+              borderRadius: '4px',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-secondary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
             }}
           >
-            <ShieldCheck size={26} color="#ffffff" />
-          </div>
-          <div>
-            <h1 style={{ fontSize: '1.65rem', fontWeight: '800', lineHeight: 1.2 }}>
-              Admin Control Center
-            </h1>
-            <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-              Manage tests, candidate teams, questions, and view live results
-            </span>
-          </div>
+            Overview
+          </span>
         </div>
+        <h1 style={{ fontSize: '1.75rem', fontWeight: '800', letterSpacing: '-0.02em', color: 'var(--text-primary)', lineHeight: 1.2 }}>
+          Admin Dashboard
+        </h1>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+          Monitor candidate progress, maintain question banks, and evaluate test performance
+        </p>
       </div>
 
-      {/* Modules Grid */}
+      {/* KPI Overview Grid */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '1.25rem',
+          marginBottom: '2.25rem',
+        }}
+      >
+        <div className="glass-card" style={{ padding: '1.25rem 1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-secondary)' }}>
+              Registered Teams
+            </span>
+            <div
+              style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '8px',
+                background: 'rgba(99, 102, 241, 0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Users size={17} color="#6366f1" />
+            </div>
+          </div>
+          <div style={{ fontSize: '1.85rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+            {stats.loading ? '...' : stats.teamsCount}
+          </div>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Eligible test participants</span>
+        </div>
+
+        <div className="glass-card" style={{ padding: '1.25rem 1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-secondary)' }}>
+              Question Bank
+            </span>
+            <div
+              style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '8px',
+                background: 'rgba(139, 92, 246, 0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <FileQuestion size={17} color="#8b5cf6" />
+            </div>
+          </div>
+          <div style={{ fontSize: '1.85rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+            {stats.loading ? '...' : stats.questionsCount}
+          </div>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>MCQ questions loaded</span>
+        </div>
+
+        <div className="glass-card" style={{ padding: '1.25rem 1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-secondary)' }}>
+              Completed Tests
+            </span>
+            <div
+              style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '8px',
+                background: 'rgba(16, 185, 129, 0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <CheckCircle2 size={17} color="#10b981" />
+            </div>
+          </div>
+          <div style={{ fontSize: '1.85rem', fontWeight: '800', color: '#10b981' }}>
+            {stats.loading ? '...' : stats.submissionsCount}
+          </div>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Submissions recorded</span>
+        </div>
+
+        <div className="glass-card" style={{ padding: '1.25rem 1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-secondary)' }}>
+              Test Duration
+            </span>
+            <div
+              style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '8px',
+                background: 'rgba(245, 158, 11, 0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Clock size={17} color="#f59e0b" />
+            </div>
+          </div>
+          <div style={{ fontSize: '1.85rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+            60 <span style={{ fontSize: '1rem', fontWeight: '500', color: 'var(--text-muted)' }}>min</span>
+          </div>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Standard session limit</span>
+        </div>
+      </div>
+
+      {/* Primary Modules Grid */}
+      <h2 style={{ fontSize: '1.15rem', fontWeight: '700', marginBottom: '1rem', color: 'var(--text-primary)' }}>
+        Management Modules
+      </h2>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
           gap: '1.5rem',
         }}
       >
@@ -93,7 +233,7 @@ export default function AdminDashboard() {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              padding: '1.75rem',
             }}
           >
             <div>
@@ -107,9 +247,9 @@ export default function AdminDashboard() {
               >
                 <div
                   style={{
-                    width: '50px',
-                    height: '50px',
-                    borderRadius: '12px',
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '10px',
                     background: 'var(--bg-secondary)',
                     display: 'flex',
                     alignItems: 'center',
@@ -121,15 +261,15 @@ export default function AdminDashboard() {
                 </div>
                 <span className="badge badge-success">{item.badge}</span>
               </div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
                 {item.title}
               </h3>
               <p
                 style={{
                   color: 'var(--text-secondary)',
-                  fontSize: '0.9rem',
+                  fontSize: '0.88rem',
                   lineHeight: '1.5',
-                  marginBottom: '1.5rem',
+                  marginBottom: '1.75rem',
                 }}
               >
                 {item.desc}

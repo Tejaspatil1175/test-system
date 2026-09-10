@@ -240,15 +240,15 @@ export default function TestPage() {
               gap: '0.5rem',
               padding: '0.5rem 1rem',
               borderRadius: 'var(--radius-md)',
-              background: isLowTime ? 'rgba(239, 68, 68, 0.15)' : 'rgba(99, 102, 241, 0.15)',
-              border: `1px solid ${isLowTime ? '#ef4444' : 'var(--accent-primary)'}`,
-              color: isLowTime ? '#f87171' : '#818cf8',
-              fontWeight: '700',
-              fontSize: '1.25rem',
+              background: isLowTime ? '#fef2f2' : '#ede9fe',
+              border: `1px solid ${isLowTime ? '#fca5a5' : '#c7d2fe'}`,
+              color: isLowTime ? '#dc2626' : '#4f46e5',
+              fontWeight: '800',
+              fontSize: '1.2rem',
               fontVariantNumeric: 'tabular-nums',
             }}
           >
-            <Clock size={20} />
+            <Clock size={19} />
             <span>{formatTimer(remainingMs)}</span>
           </div>
 

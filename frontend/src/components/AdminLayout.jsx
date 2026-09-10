@@ -63,12 +63,33 @@ export default function AdminLayout() {
       {/* Left Sidebar */}
       <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="admin-sidebar-header">
-          <div className="admin-brand-logo">
-            <Shield size={24} color="#ffffff" />
-          </div>
           <div className="admin-brand-info">
-            <span className="admin-brand-title">CodeCore</span>
-            <span className="admin-brand-subtitle">Admin Portal</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{
+                fontSize: '1.25rem',
+                fontWeight: '800',
+                letterSpacing: '-0.03em',
+                color: 'var(--text-primary)',
+              }}>
+                CodeCore
+              </span>
+              <span style={{
+                fontSize: '0.65rem',
+                fontWeight: '700',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-secondary)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+              }}>
+                Admin
+              </span>
+            </div>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+              Assessment Control Suite
+            </span>
           </div>
           <button
             className="admin-mobile-close"

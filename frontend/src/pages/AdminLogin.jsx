@@ -36,25 +36,29 @@ export default function AdminLogin() {
   return (
     <div style={{ maxWidth: '420px', margin: '4rem auto 0' }}>
       <div className="glass-card">
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div
-            style={{
-              width: '54px',
-              height: '54px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '1rem',
-              boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)',
-            }}
-          >
-            <Shield size={28} color="#ffffff" />
+        <div style={{ textAlign: 'left', marginBottom: '2rem' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '0.75rem' }}>
+            <span
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: '700',
+                padding: '3px 8px',
+                borderRadius: '4px',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-secondary)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              Administrator
+            </span>
           </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Admin Portal</h2>
+          <h2 style={{ fontSize: '1.65rem', fontWeight: '800', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
+            Admin Portal
+          </h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-            Sign in to manage test series and results
+            Sign in with your credentials to manage tests and results
           </p>
         </div>
 

@@ -8,11 +8,11 @@ import ManageTeams from './pages/ManageTeams';
 import ManageQuestions from './pages/ManageQuestions';
 import ViewResults from './pages/ViewResults';
 import TeamLogin from './pages/TeamLogin';
+import TestPage from './pages/TestPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
-const TestPage = () => <div className="glass-card">Test Page Placeholder</div>;
-
 const SubmittedPage = () => <div className="glass-card">Submitted Page Placeholder</div>;
+
 
 
 export default function App() {

@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const Team = require('../models/Team');
 const Submission = require('../models/Submission');
+const Question = require('../models/Question');
 
 const createTeam = async (req, res) => {
   try {
@@ -74,8 +75,64 @@ const listTeams = async (req, res) => {
   }
 };
 
+const addQuestion = async (req, res) => {
+  try {
+    const { questionText, options, correctOption } = req.body;
+
+    if (!questionText || !options || !Array.isArray(options) || options.length === 0 || !correctOption) {
+      return res.status(400).json({ message: 'questionText, options (array), and correctOption are required' });
+    }
+
+    const question = new Question({
+      questionText: questionText.trim(),
+      options: options.map((opt) => String(opt).trim()),
+      correctOption: correctOption.trim(),
+    });
+
+    await question.save();
+
+    return res.status(201).json({
+      message: 'Question added successfully',
+      question,
+    });
+  } catch (error) {
+    console.error('Error adding question:', error);
+    return res.status(500).json({ message: 'Server error while adding question' });
+  }
+};
+
+const getQuestions = async (req, res) => {
+  try {
+    const questions = await Question.find().sort({ _id: 1 });
+    return res.status(200).json(questions);
+  } catch (error) {
+    console.error('Error getting questions:', error);
+    return res.status(500).json({ message: 'Server error while fetching questions' });
+  }
+};
+
+const deleteQuestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const question = await Question.findByIdAndDelete(id);
+    if (!question) {
+      return res.status(404).json({ message: 'Question not found' });
+    }
+
+    return res.status(200).json({ message: 'Question deleted successfully', id });
+  } catch (error) {
+    console.error('Error deleting question:', error);
+    return res.status(500).json({ message: 'Server error while deleting question' });
+  }
+};
+
 module.exports = {
   createTeam,
   listTeams,
+  addQuestion,
+  getQuestions,
+  deleteQuestion,
 };
+
 

@@ -127,12 +127,74 @@ const deleteQuestion = async (req, res) => {
   }
 };
 
+const calculateResults = async (req, res) => {
+  try {
+    const questions = await Question.find();
+    const questionMap = new Map();
+    questions.forEach((q) => {
+      questionMap.set(q._id.toString(), q.correctOption);
+    });
+
+    const submissions = await Submission.find({ submitted: true });
+
+    for (const submission of submissions) {
+      let score = 0;
+      if (Array.isArray(submission.answers)) {
+        submission.answers.forEach((ans) => {
+          if (ans.questionId && ans.selectedOption) {
+            const correctOpt = questionMap.get(ans.questionId.toString());
+            if (correctOpt && correctOpt.trim() === ans.selectedOption.trim()) {
+              score += 1;
+            }
+          }
+        });
+      }
+      submission.score = score;
+      await submission.save();
+    }
+
+    return await getResults(req, res);
+  } catch (error) {
+    console.error('Error calculating results:', error);
+    return res.status(500).json({ message: 'Server error calculating results' });
+  }
+};
+
+const getResults = async (req, res) => {
+  try {
+    const submissions = await Submission.find({ submitted: true })
+      .populate('teamId', 'teamName username')
+      .sort({ score: -1, timeTakenMs: 1 });
+
+    const results = submissions.map((sub, index) => ({
+      rank: index + 1,
+      submissionId: sub._id,
+      teamId: sub.teamId ? sub.teamId._id : null,
+      teamName: sub.teamId ? sub.teamId.teamName : 'Unknown Team',
+      username: sub.teamId ? sub.teamId.username : '',
+      score: sub.score !== null ? sub.score : 0,
+      timeTakenMs: sub.timeTakenMs || 0,
+      startTime: sub.startTime,
+      endTime: sub.endTime,
+      submitted: sub.submitted,
+    }));
+
+    return res.status(200).json(results);
+  } catch (error) {
+    console.error('Error fetching results:', error);
+    return res.status(500).json({ message: 'Server error fetching results' });
+  }
+};
+
 module.exports = {
   createTeam,
   listTeams,
   addQuestion,
   getQuestions,
   deleteQuestion,
+  calculateResults,
+  getResults,
 };
+
 
 

@@ -6,6 +6,8 @@ const {
   addQuestion,
   getQuestions,
   deleteQuestion,
+  calculateResults,
+  getResults,
 } = require('../controllers/adminController');
 const verifyToken = require('../middleware/auth');
 const isAdmin = require('../middleware/isAdmin');
@@ -17,6 +19,10 @@ router.post('/questions', verifyToken, isAdmin, addQuestion);
 router.get('/questions', verifyToken, isAdmin, getQuestions);
 router.delete('/questions/:id', verifyToken, isAdmin, deleteQuestion);
 
+router.post('/calculate-results', verifyToken, isAdmin, calculateResults);
+router.get('/results', verifyToken, isAdmin, getResults);
+
 module.exports = router;
+
 
 

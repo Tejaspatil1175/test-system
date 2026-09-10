@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { Clock, AlertTriangle, CheckCircle2, Award, ListChecks } from 'lucide-react';
+import { Clock, CheckCircle2, Send, Save, AlertCircle } from 'lucide-react';
 
 export default function TestPage() {
   const [startTime, setStartTime] = useState(null);
@@ -14,18 +14,102 @@ export default function TestPage() {
       return {};
     }
   });
+  const [remainingMs, setRemainingMs] = useState(3600000);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [autosaving, setAutosaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const timerRef = useRef(null);
   const autosaveRef = useRef(null);
   const answersRef = useRef(answers);
+  const submittedRef = useRef(false);
 
   useEffect(() => {
     answersRef.current = answers;
   }, [answers]);
 
+  const handleSubmitTest = useCallback(
+    async (isAuto = false) => {
+      if (submittedRef.current || submitting) return;
+      submittedRef.current = true;
+      setSubmitting(true);
+
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (autosaveRef.current) clearInterval(autosaveRef.current);
+
+      try {
+        const currentAnswers = answersRef.current;
+        const formatted = Object.keys(currentAnswers).map((qId) => ({
+          questionId: qId,
+          selectedOption: currentAnswers[qId],
+        }));
+
+        await api.post('/test/submit', { answers: formatted });
+
+        try {
+          localStorage.removeItem('test_answers_cache');
+        } catch (e) {}
+
+        navigate('/submitted', { replace: true });
+      } catch (err) {
+        if (err.response && err.response.status === 403) {
+          navigate('/submitted', { replace: true });
+          return;
+        }
+        setError(
+          (err.response && err.response.data && err.response.data.message) ||
+            'Failed to submit test. Please retry.'
+        );
+        submittedRef.current = false;
+        setSubmitting(false);
+      }
+    },
+    [navigate, submitting]
+  );
+
+  useEffect(() => {
+    const initializeTest = async () => {
+      try {
+        setLoading(true);
+        const startRes = await api.get('/test/start');
+        if (startRes.data.submitted) {
+          navigate('/submitted', { replace: true });
+          return;
+        }
+
+        const serverStartTime = new Date(startRes.data.startTime).getTime();
+        setStartTime(serverStartTime);
+
+        const questionsRes = await api.get('/test/questions');
+        setQuestions(questionsRes.data);
+
+        const elapsed = Date.now() - serverStartTime;
+        const initialRemaining = Math.max(0, 3600000 - elapsed);
+        setRemainingMs(initialRemaining);
+
+        if (initialRemaining <= 0) {
+          handleSubmitTest(true);
+        }
+      } catch (err) {
+        if (err.response && err.response.status === 403) {
+          navigate('/submitted', { replace: true });
+          return;
+        }
+        setError('Failed to initialize test session. Please refresh.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeTest();
+  }, [navigate, handleSubmitTest]);
+
   // Periodic autosave every 30s
   useEffect(() => {
     autosaveRef.current = setInterval(async () => {
+      if (submittedRef.current) return;
       const currentAnswers = answersRef.current;
       const formatted = Object.keys(currentAnswers).map((qId) => ({
         questionId: qId,
@@ -50,45 +134,7 @@ export default function TestPage() {
     };
   }, []);
 
-
-  useEffect(() => {
-    const initializeTest = async () => {
-      try {
-        setLoading(true);
-        const startRes = await api.get('/test/start');
-        if (startRes.data.submitted) {
-          navigate('/submitted', { replace: true });
-          return;
-        }
-
-        const serverStartTime = new Date(startRes.data.startTime).getTime();
-        setStartTime(serverStartTime);
-
-        const questionsRes = await api.get('/test/questions');
-        setQuestions(questionsRes.data);
-
-        const elapsed = Date.now() - serverStartTime;
-        const initialRemaining = Math.max(0, 3600000 - elapsed);
-        setRemainingMs(initialRemaining);
-
-        if (initialRemaining <= 0) {
-          navigate('/submitted', { replace: true });
-        }
-      } catch (err) {
-        if (err.response && err.response.status === 403) {
-          navigate('/submitted', { replace: true });
-          return;
-        }
-        setError('Failed to initialize test session. Please refresh.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initializeTest();
-  }, [navigate]);
-
-  // Countdown timer
+  // Countdown timer with auto-submit on timeout
   useEffect(() => {
     if (!startTime) return;
 
@@ -96,14 +142,20 @@ export default function TestPage() {
       const elapsed = Date.now() - startTime;
       const currentRemaining = Math.max(0, 3600000 - elapsed);
       setRemainingMs(currentRemaining);
+
+      if (currentRemaining <= 0) {
+        clearInterval(timerRef.current);
+        handleSubmitTest(true);
+      }
     }, 1000);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [startTime]);
+  }, [startTime, handleSubmitTest]);
 
   const handleSelectOption = (questionId, option) => {
+    if (submitting) return;
     setAnswers((prev) => {
       const updated = { ...prev, [questionId]: option };
       try {
@@ -137,7 +189,7 @@ export default function TestPage() {
   }
 
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', paddingBottom: '3rem' }}>
+    <div style={{ maxWidth: '900px', margin: '0 auto', paddingBottom: '4rem' }}>
       {/* Sticky Header Bar */}
       <div
         className="glass-card"
@@ -181,7 +233,6 @@ export default function TestPage() {
             </div>
           </div>
 
-
           <div
             style={{
               display: 'flex',
@@ -200,6 +251,22 @@ export default function TestPage() {
             <Clock size={20} />
             <span>{formatTimer(remainingMs)}</span>
           </div>
+
+          <button
+            onClick={() => {
+              if (window.confirm(`Are you ready to submit your test? You have answered ${answeredCount} of ${questions.length} questions.`)) {
+                handleSubmitTest(false);
+              }
+            }}
+            className="btn btn-primary"
+            style={{
+              padding: '0.55rem 1.25rem',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            }}
+            disabled={submitting}
+          >
+            <Send size={16} /> {submitting ? 'Submitting...' : 'Submit Test'}
+          </button>
         </div>
       </div>
 
@@ -286,6 +353,7 @@ export default function TestPage() {
                           name={`question_${q._id}`}
                           checked={isSelected}
                           onChange={() => handleSelectOption(q._id, opt)}
+                          disabled={submitting}
                           style={{ cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
                         />
                         <span style={{ fontWeight: '600', color: isSelected ? 'var(--accent-primary)' : 'var(--text-muted)' }}>
@@ -301,6 +369,41 @@ export default function TestPage() {
             </div>
           );
         })}
+      </div>
+
+      {/* Bottom Submit Banner */}
+      <div
+        className="glass-card"
+        style={{
+          marginTop: '3rem',
+          textAlign: 'center',
+          padding: '2.5rem',
+          border: '1px solid rgba(16, 185, 129, 0.3)',
+        }}
+      >
+        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>
+          Completed your answers?
+        </h3>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+          You have answered {answeredCount} out of {questions.length} questions. Once submitted, your answers cannot be altered.
+        </p>
+
+        <button
+          onClick={() => {
+            if (window.confirm(`Are you sure you want to submit your final answers? (${answeredCount}/${questions.length} answered)`)) {
+              handleSubmitTest(false);
+            }
+          }}
+          className="btn btn-primary"
+          style={{
+            padding: '0.85rem 2.5rem',
+            fontSize: '1.05rem',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+          }}
+          disabled={submitting}
+        >
+          <Send size={18} /> {submitting ? 'Submitting Final Test...' : 'Submit Final Answers'}
+        </button>
       </div>
     </div>
   );

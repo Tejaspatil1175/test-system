@@ -4,6 +4,7 @@ const {
   createTeam,
   listTeams,
   addQuestion,
+  bulkImportQuestions,
   getQuestions,
   deleteQuestion,
   calculateResults,
@@ -21,6 +22,7 @@ router.post('/create-team', verifyToken, isAdmin, createTeam);
 router.get('/teams', verifyToken, isAdmin, listTeams);
 
 router.post('/questions', verifyToken, isAdmin, addQuestion);
+router.post('/questions/bulk', verifyToken, isAdmin, bulkImportQuestions);
 router.get('/questions', verifyToken, isAdmin, getQuestions);
 router.delete('/questions/:id', verifyToken, isAdmin, deleteQuestion);
 

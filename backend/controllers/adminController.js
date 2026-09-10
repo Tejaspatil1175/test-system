@@ -77,7 +77,7 @@ const listTeams = async (req, res) => {
 
 const addQuestion = async (req, res) => {
   try {
-    const { questionText, options, correctOption } = req.body;
+    const { questionText, options, correctOption, type, codeSnippet } = req.body;
 
     if (!questionText || !options || !Array.isArray(options) || options.length === 0 || !correctOption) {
       return res.status(400).json({ message: 'questionText, options (array), and correctOption are required' });
@@ -85,6 +85,8 @@ const addQuestion = async (req, res) => {
 
     const question = new Question({
       questionText: questionText.trim(),
+      type: type === 'code_rearrange' ? 'code_rearrange' : 'mcq',
+      codeSnippet: codeSnippet ? codeSnippet.trim() : '',
       options: options.map((opt) => String(opt).trim()),
       correctOption: correctOption.trim(),
     });
@@ -98,6 +100,40 @@ const addQuestion = async (req, res) => {
   } catch (error) {
     console.error('Error adding question:', error);
     return res.status(500).json({ message: 'Server error while adding question' });
+  }
+};
+
+const bulkImportQuestions = async (req, res) => {
+  try {
+    const { questions } = req.body;
+
+    if (!Array.isArray(questions) || questions.length === 0) {
+      return res.status(400).json({ message: 'questions array is required' });
+    }
+
+    const validQuestions = questions
+      .filter((q) => q.questionText && Array.isArray(q.options) && q.options.length >= 2 && q.correctOption)
+      .map((q) => ({
+        questionText: q.questionText.trim(),
+        type: q.type === 'code_rearrange' ? 'code_rearrange' : 'mcq',
+        codeSnippet: q.codeSnippet ? q.codeSnippet.trim() : '',
+        options: q.options.map((opt) => String(opt).trim()),
+        correctOption: q.correctOption.trim(),
+      }));
+
+    if (validQuestions.length === 0) {
+      return res.status(400).json({ message: 'No valid questions found in payload' });
+    }
+
+    const inserted = await Question.insertMany(validQuestions);
+
+    return res.status(201).json({
+      message: `Successfully imported ${inserted.length} questions into the bank!`,
+      count: inserted.length,
+    });
+  } catch (error) {
+    console.error('Error importing questions:', error);
+    return res.status(500).json({ message: 'Server error while importing questions' });
   }
 };
 
@@ -284,6 +320,7 @@ module.exports = {
   createTeam,
   listTeams,
   addQuestion,
+  bulkImportQuestions,
   getQuestions,
   deleteQuestion,
   calculateResults,

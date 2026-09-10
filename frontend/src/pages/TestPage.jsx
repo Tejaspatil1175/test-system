@@ -296,36 +296,86 @@ export default function TestPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
         {questions.map((q, idx) => {
           const selected = answers[q._id];
+          const isRearrange = q.type === 'code_rearrange';
+
           return (
             <div
               key={q._id}
               className="glass-card"
               style={{
-                border: selected ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                border: selected ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem', marginBottom: '1rem' }}>
                 <span
                   style={{
                     background: selected ? 'var(--accent-primary)' : 'var(--bg-secondary)',
                     color: selected ? '#ffffff' : 'var(--text-primary)',
                     width: '32px',
                     height: '32px',
-                    borderRadius: '50%',
+                    borderRadius: '8px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '0.9rem',
-                    fontWeight: '700',
+                    fontWeight: '800',
                     flexShrink: 0,
+                    marginTop: '2px',
                   }}
                 >
                   {idx + 1}
                 </span>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: '600', lineHeight: 1.5, marginTop: '2px', color: 'var(--text-primary)' }}>
-                  {q.questionText}
-                </h3>
+                <div style={{ flex: 1 }}>
+                  {isRearrange && (
+                    <div style={{ marginBottom: '6px' }}>
+                      <span
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: '700',
+                          padding: '2px 7px',
+                          borderRadius: '4px',
+                          background: '#ede9fe',
+                          color: '#4f46e5',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.04em',
+                        }}
+                      >
+                        Code Rearrangement
+                      </span>
+                    </div>
+                  )}
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: '700', lineHeight: 1.5, color: 'var(--text-primary)' }}>
+                    {q.questionText}
+                  </h3>
+                </div>
               </div>
+
+              {/* Code Snippet Box */}
+              {q.codeSnippet && (
+                <div
+                  style={{
+                    margin: '0.75rem 0 1.25rem 2.8rem',
+                    padding: '1rem 1.25rem',
+                    background: '#0f172a',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid #334155',
+                    overflowX: 'auto',
+                  }}
+                >
+                  <pre
+                    style={{
+                      margin: 0,
+                      fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+                      fontSize: '0.88rem',
+                      color: '#e2e8f0',
+                      lineHeight: 1.55,
+                    }}
+                  >
+                    {q.codeSnippet}
+                  </pre>
+                </div>
+              )}
 
               {/* Options */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingLeft: '2.8rem' }}>
@@ -343,7 +393,7 @@ export default function TestPage() {
                           padding: '0.85rem 1.25rem',
                           borderRadius: 'var(--radius-md)',
                           background: isSelected ? 'rgba(99, 102, 241, 0.08)' : 'var(--bg-primary)',
-                          border: `1px solid ${isSelected ? 'var(--accent-primary)' : 'var(--border-color)'}`,
+                          border: `1.5px solid ${isSelected ? 'var(--accent-primary)' : 'var(--border-color)'}`,
                           cursor: 'pointer',
                           transition: 'all 0.2s ease',
                         }}
@@ -354,12 +404,19 @@ export default function TestPage() {
                           checked={isSelected}
                           onChange={() => handleSelectOption(q._id, opt)}
                           disabled={submitting}
-                          style={{ cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
+                          style={{ cursor: 'pointer', accentColor: 'var(--accent-primary)', transform: 'scale(1.1)' }}
                         />
-                        <span style={{ fontWeight: '600', color: isSelected ? 'var(--accent-primary)' : 'var(--text-muted)' }}>
+                        <span style={{ fontWeight: '700', color: isSelected ? 'var(--accent-primary)' : 'var(--text-muted)' }}>
                           ({String.fromCharCode(65 + optIdx)})
                         </span>
-                        <span style={{ fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: isSelected ? '600' : '400' }}>
+                        <span
+                          style={{
+                            fontSize: '0.95rem',
+                            color: 'var(--text-primary)',
+                            fontWeight: isSelected ? '700' : '400',
+                            fontFamily: isRearrange ? 'monospace' : 'inherit',
+                          }}
+                        >
                           {opt}
                         </span>
                       </label>

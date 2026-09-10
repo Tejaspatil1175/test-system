@@ -4,11 +4,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 // Placeholders for Step 17 skeleton
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import ManageTeams from './pages/ManageTeams';
 import ProtectedRoute from './components/ProtectedRoute';
 
-const ManageTeams = () => <div className="glass-card">Manage Teams Placeholder</div>;
-
 const ManageQuestions = () => <div className="glass-card">Manage Questions Placeholder</div>;
+
 const ViewResults = () => <div className="glass-card">View Results Placeholder</div>;
 const TeamLogin = () => <div className="glass-card">Team Login Placeholder</div>;
 const TestPage = () => <div className="glass-card">Test Page Placeholder</div>;

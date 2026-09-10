@@ -219,6 +219,67 @@ const downloadTeamPdf = async (req, res) => {
   }
 };
 
+const clearSubmissions = async (req, res) => {
+  try {
+    const result = await Submission.deleteMany({});
+    return res.status(200).json({
+      message: 'All test submissions and results have been cleared successfully.',
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.error('Error clearing submissions:', error);
+    return res.status(500).json({ message: 'Server error while clearing submissions' });
+  }
+};
+
+const clearTeams = async (req, res) => {
+  try {
+    const teamResult = await Team.deleteMany({});
+    const subResult = await Submission.deleteMany({});
+    return res.status(200).json({
+      message: 'All candidate teams and associated submissions have been deleted successfully.',
+      deletedTeamsCount: teamResult.deletedCount,
+      deletedSubmissionsCount: subResult.deletedCount,
+    });
+  } catch (error) {
+    console.error('Error clearing teams:', error);
+    return res.status(500).json({ message: 'Server error while deleting teams' });
+  }
+};
+
+const clearQuestions = async (req, res) => {
+  try {
+    const result = await Question.deleteMany({});
+    return res.status(200).json({
+      message: 'All questions have been cleared from the question bank.',
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.error('Error clearing questions:', error);
+    return res.status(500).json({ message: 'Server error while clearing questions' });
+  }
+};
+
+const clearEntireDatabase = async (req, res) => {
+  try {
+    const subResult = await Submission.deleteMany({});
+    const teamResult = await Team.deleteMany({});
+    const questionResult = await Question.deleteMany({});
+
+    return res.status(200).json({
+      message: 'System factory reset complete. All test data cleared (Admin credentials preserved).',
+      details: {
+        submissionsDeleted: subResult.deletedCount,
+        teamsDeleted: teamResult.deletedCount,
+        questionsDeleted: questionResult.deletedCount,
+      },
+    });
+  } catch (error) {
+    console.error('Error wiping database:', error);
+    return res.status(500).json({ message: 'Server error during database reset' });
+  }
+};
+
 module.exports = {
   createTeam,
   listTeams,
@@ -228,6 +289,10 @@ module.exports = {
   calculateResults,
   getResults,
   downloadTeamPdf,
+  clearSubmissions,
+  clearTeams,
+  clearQuestions,
+  clearEntireDatabase,
 };
 
 

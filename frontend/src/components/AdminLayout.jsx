@@ -5,6 +5,7 @@ import {
   Users,
   FileQuestion,
   Award,
+  Settings,
   LogOut,
   Search,
   Bell,
@@ -47,6 +48,11 @@ export default function AdminLayout() {
       label: 'Results & Ranks',
       path: '/admin/results',
       icon: <Award size={20} />,
+    },
+    {
+      label: 'System Settings',
+      path: '/admin/settings',
+      icon: <Settings size={20} />,
     },
   ];
 

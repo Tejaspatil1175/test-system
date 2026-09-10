@@ -11,7 +11,8 @@ import {
   CheckCircle2,
   AlertCircle,
   PlusCircle,
-  ShieldAlert
+  ShieldAlert,
+  Settings
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -72,6 +73,15 @@ export default function AdminDashboard() {
       badge: `${stats.submissionsCount} Evaluated`,
       icon: <Award size={22} color="#10b981" />,
       accent: '#10b981',
+    },
+    {
+      title: 'Database & Settings',
+      desc: 'Clear test submissions, reset candidate rosters, or factory reset collections.',
+      link: '/admin/settings',
+      btnText: 'System Settings',
+      badge: 'Maintenance',
+      icon: <Settings size={22} color="#f59e0b" />,
+      accent: '#f59e0b',
     },
   ];
 

@@ -6,6 +6,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ManageTeams from './pages/ManageTeams';
 import ManageQuestions from './pages/ManageQuestions';
 import ViewResults from './pages/ViewResults';
+import AdminSettings from './pages/AdminSettings';
 import TeamLogin from './pages/TeamLogin';
 import TestPage from './pages/TestPage';
 import SubmittedPage from './pages/SubmittedPage';
@@ -55,6 +56,7 @@ export default function App() {
             <Route path="/admin/teams" element={<ManageTeams />} />
             <Route path="/admin/questions" element={<ManageQuestions />} />
             <Route path="/admin/results" element={<ViewResults />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
           </Route>
         </Route>
 

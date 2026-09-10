@@ -62,16 +62,7 @@ export default function App() {
 
         {/* Protected Candidate Test Routes */}
         <Route element={<ProtectedRoute requiredRole="team" />}>
-          <Route
-            path="/test"
-            element={
-              <div className="app-container">
-                <main className="main-content">
-                  <TestPage />
-                </main>
-              </div>
-            }
-          />
+          <Route path="/test" element={<TestPage />} />
           <Route
             path="/submitted"
             element={

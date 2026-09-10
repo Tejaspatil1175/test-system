@@ -40,13 +40,13 @@ export default function AdminDashboard() {
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-      {/* Top Bar */}
+      {/* Page Header Banner */}
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '2.5rem',
+          marginBottom: '2rem',
           flexWrap: 'wrap',
           gap: '1rem',
         }}
@@ -54,30 +54,27 @@ export default function AdminDashboard() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           <div
             style={{
-              width: '44px',
-              height: '44px',
+              width: '46px',
+              height: '46px',
               borderRadius: '12px',
-              background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              boxShadow: '0 4px 14px rgba(99, 102, 241, 0.3)',
             }}
           >
-            <ShieldCheck size={24} color="#ffffff" />
+            <ShieldCheck size={26} color="#ffffff" />
           </div>
           <div>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: '800', lineHeight: 1.2 }}>
+            <h1 style={{ fontSize: '1.65rem', fontWeight: '800', lineHeight: 1.2 }}>
               Admin Control Center
             </h1>
             <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-              MCQ Test Series Management
+              Manage tests, candidate teams, questions, and view live results
             </span>
           </div>
         </div>
-
-        <button onClick={handleLogout} className="btn btn-secondary" style={{ padding: '0.55rem 1rem' }}>
-          <LogOut size={16} /> Logout
-        </button>
       </div>
 
       {/* Modules Grid */}

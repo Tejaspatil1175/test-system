@@ -1,4 +1,5 @@
 const Submission = require('../models/Submission');
+const Question = require('../models/Question');
 
 const startTest = async (req, res) => {
   try {
@@ -42,6 +43,22 @@ const startTest = async (req, res) => {
   }
 };
 
+const getTestQuestions = async (req, res) => {
+  try {
+    if (req.user.role !== 'team') {
+      return res.status(403).json({ message: 'Access denied. Team account required.' });
+    }
+
+    const questions = await Question.find().select('-correctOption').sort({ _id: 1 });
+    return res.status(200).json(questions);
+  } catch (error) {
+    console.error('Error fetching test questions:', error);
+    return res.status(500).json({ message: 'Server error fetching questions' });
+  }
+};
+
 module.exports = {
   startTest,
+  getTestQuestions,
 };
+

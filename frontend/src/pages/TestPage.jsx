@@ -14,11 +14,42 @@ export default function TestPage() {
       return {};
     }
   });
-  const [remainingMs, setRemainingMs] = useState(3600000);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-  const timerRef = useRef(null);
+  const [autosaving, setAutosaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
+  const autosaveRef = useRef(null);
+  const answersRef = useRef(answers);
+
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
+
+  // Periodic autosave every 30s
+  useEffect(() => {
+    autosaveRef.current = setInterval(async () => {
+      const currentAnswers = answersRef.current;
+      const formatted = Object.keys(currentAnswers).map((qId) => ({
+        questionId: qId,
+        selectedOption: currentAnswers[qId],
+      }));
+
+      if (formatted.length > 0) {
+        try {
+          setAutosaving(true);
+          await api.post('/test/autosave', { answers: formatted });
+          setLastSaved(new Date());
+        } catch (e) {
+          console.warn('Silent autosave failed:', e);
+        } finally {
+          setAutosaving(false);
+        }
+      }
+    }, 30000);
+
+    return () => {
+      if (autosaveRef.current) clearInterval(autosaveRef.current);
+    };
+  }, []);
+
 
   useEffect(() => {
     const initializeTest = async () => {
@@ -130,12 +161,26 @@ export default function TestPage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          {lastSaved && (
+            <span
+              style={{
+                fontSize: '0.75rem',
+                color: 'var(--text-muted)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              <CheckCircle2 size={12} color="#10b981" /> {autosaving ? 'Saving...' : 'Saved'}
+            </span>
+          )}
           <div style={{ textAlign: 'right' }}>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Progress</span>
             <div style={{ fontSize: '0.95rem', fontWeight: '600' }}>
               {answeredCount} of {questions.length} answered
             </div>
           </div>
+
 
           <div
             style={{

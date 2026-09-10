@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 
 export default function TestPage() {
+  const [isTestActive, setIsTestActive] = useState(false);
+  const [testEnded, setTestEnded] = useState(false);
   const [startTime, setStartTime] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -44,6 +46,7 @@ export default function TestPage() {
   const navigate = useNavigate();
   const timerRef = useRef(null);
   const autosaveRef = useRef(null);
+  const lobbyPollRef = useRef(null);
   const answersRef = useRef(answers);
   const submittedRef = useRef(false);
 
@@ -90,45 +93,85 @@ export default function TestPage() {
     [navigate, submitting]
   );
 
-  useEffect(() => {
-    const initializeTest = async () => {
-      try {
-        setLoading(true);
-        const startRes = await api.get('/test/start');
-        if (startRes.data.submitted) {
-          navigate('/submitted', { replace: true });
-          return;
-        }
+  const checkAndLaunchTest = useCallback(async () => {
+    try {
+      const startRes = await api.get('/test/start');
 
-        const serverStartTime = new Date(startRes.data.startTime).getTime();
-        setStartTime(serverStartTime);
-
-        const questionsRes = await api.get('/test/questions');
-        setQuestions(questionsRes.data);
-
-        const elapsed = Date.now() - serverStartTime;
-        const initialRemaining = Math.max(0, 3600000 - elapsed);
-        setRemainingMs(initialRemaining);
-
-        if (initialRemaining <= 0) {
-          handleSubmitTest(true);
-        }
-      } catch (err) {
-        if (err.response && err.response.status === 403) {
-          navigate('/submitted', { replace: true });
-          return;
-        }
-        setError('Failed to initialize test session. Please refresh.');
-      } finally {
+      if (startRes.data.isTestActive === false) {
+        setIsTestActive(false);
+        setTestEnded(startRes.data.testEnded || false);
         setLoading(false);
+        return false;
+      }
+
+      if (startRes.data.submitted) {
+        navigate('/submitted', { replace: true });
+        return true;
+      }
+
+      setIsTestActive(true);
+      const serverStartTime = new Date(startRes.data.startTime).getTime();
+      setStartTime(serverStartTime);
+
+      const questionsRes = await api.get('/test/questions');
+      setQuestions(questionsRes.data);
+
+      const elapsed = Date.now() - serverStartTime;
+      const initialRemaining = Math.max(0, 3600000 - elapsed);
+      setRemainingMs(initialRemaining);
+
+      if (initialRemaining <= 0) {
+        handleSubmitTest(true);
+      }
+
+      setLoading(false);
+      return true;
+    } catch (err) {
+      if (err.response && err.response.status === 403) {
+        if (err.response.data && err.response.data.message && err.response.data.message.includes('not active')) {
+          setIsTestActive(false);
+          setLoading(false);
+          return false;
+        }
+        navigate('/submitted', { replace: true });
+        return true;
+      }
+      setError('Failed to initialize test session. Please refresh.');
+      setLoading(false);
+      return false;
+    }
+  }, [navigate, handleSubmitTest]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const runInit = async () => {
+      setLoading(true);
+      const isLive = await checkAndLaunchTest();
+
+      if (!isLive && isMounted) {
+        // Poll every 3 seconds for admin start signal
+        lobbyPollRef.current = setInterval(async () => {
+          const started = await checkAndLaunchTest();
+          if (started && lobbyPollRef.current) {
+            clearInterval(lobbyPollRef.current);
+          }
+        }, 3000);
       }
     };
 
-    initializeTest();
-  }, [navigate, handleSubmitTest]);
+    runInit();
+
+    return () => {
+      isMounted = false;
+      if (lobbyPollRef.current) clearInterval(lobbyPollRef.current);
+    };
+  }, [checkAndLaunchTest]);
 
   // Periodic autosave every 30s
   useEffect(() => {
+    if (!isTestActive) return;
+
     autosaveRef.current = setInterval(async () => {
       if (submittedRef.current) return;
       const currentAnswers = answersRef.current;
@@ -153,11 +196,11 @@ export default function TestPage() {
     return () => {
       if (autosaveRef.current) clearInterval(autosaveRef.current);
     };
-  }, []);
+  }, [isTestActive]);
 
   // Countdown timer with auto-submit on timeout
   useEffect(() => {
-    if (!startTime) return;
+    if (!isTestActive || !startTime) return;
 
     timerRef.current = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -173,7 +216,7 @@ export default function TestPage() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [startTime, handleSubmitTest]);
+  }, [isTestActive, startTime, handleSubmitTest]);
 
   const handleSelectOption = (questionId, option) => {
     if (submitting) return;
@@ -205,21 +248,115 @@ export default function TestPage() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const teamName = localStorage.getItem('teamName') || 'Candidate';
+
   if (loading) {
     return (
       <div className="center-container">
         <div style={{ textAlign: 'center' }}>
           <div className="spinner" style={{ margin: '0 auto 1.5rem' }} />
           <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--text-primary)' }}>
-            Loading Test Session...
+            Connecting to Test Server...
           </h2>
           <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-            Preparing your environment and questions.
+            Verifying candidate credentials and assessment session state.
           </p>
         </div>
       </div>
     );
   }
+
+  // =========================================================================
+  // WAITING LOBBY (When Admin has not started the test yet)
+  // =========================================================================
+  if (!isTestActive) {
+    return (
+      <div className="center-container" style={{ minHeight: '100vh', padding: '2rem' }}>
+        <div
+          className="glass-card"
+          style={{
+            maxWidth: '560px',
+            width: '100%',
+            textAlign: 'center',
+            padding: '3rem 2.5rem',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Top Live Radar Badge */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#fef3c7', border: '1px solid #fde68a', padding: '0.4rem 1rem', borderRadius: '999px', marginBottom: '1.75rem' }}>
+            <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#f59e0b', animation: 'pulse 1.5s infinite' }}></span>
+            <span style={{ fontSize: '0.82rem', fontWeight: '800', color: '#92400e', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {testEnded ? 'Test Concluded' : 'Assessment Lobby • Waiting for Host'}
+            </span>
+          </div>
+
+          <div
+            style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '16px',
+              background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1.25rem',
+              boxShadow: '0 8px 20px rgba(99, 102, 241, 0.25)',
+            }}
+          >
+            <Clock size={32} />
+          </div>
+
+          <h2 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '0.6rem' }}>
+            {testEnded ? 'The Exam has Concluded' : 'The Test Has Not Started Yet'}
+          </h2>
+
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+            {testEnded
+              ? 'The administrator has concluded this exam session. If you believe this is an error, please contact your invigilator.'
+              : 'Please wait in this room. The exam will start automatically for everyone at the exact same time when the administrator clicks Start.'}
+          </p>
+
+          {/* Candidate Team Badge Card */}
+          <div
+            style={{
+              background: 'var(--bg-primary)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-color)',
+              padding: '1.25rem',
+              marginBottom: '2rem',
+              textAlign: 'left',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div>
+              <div style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                Candidate Team
+              </div>
+              <div style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+                {teamName}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10b981', fontSize: '0.82rem', fontWeight: '700' }}>
+              <CheckCircle2 size={16} /> Ready & Connected
+            </div>
+          </div>
+
+          {!testEnded && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+              <div className="spinner" style={{ width: '14px', height: '14px', borderWidth: '2px', borderColor: 'var(--accent-primary) transparent transparent transparent' }} />
+              <span>Listening for host start signal (auto-sync active)...</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
 
   if (questions.length === 0) {
     return (
@@ -239,7 +376,6 @@ export default function TestPage() {
   const unansweredCount = Math.max(0, questions.length - answeredCount);
   const progressPercent = Math.round((answeredCount / questions.length) * 100);
   const isLowTime = remainingMs < 300000; // < 5 minutes
-  const teamName = localStorage.getItem('teamName') || 'Candidate';
 
   const currentQuestion = questions[currentIndex] || questions[0];
   const isCurrentAnswered = currentQuestion && !!answers[currentQuestion._id];

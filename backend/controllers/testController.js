@@ -1,5 +1,6 @@
 const Submission = require('../models/Submission');
 const Question = require('../models/Question');
+const TestConfig = require('../models/TestConfig');
 
 const startTest = async (req, res) => {
   try {
@@ -9,20 +10,36 @@ const startTest = async (req, res) => {
       return res.status(403).json({ message: 'Access denied. Team account required.' });
     }
 
+    // Check global test configuration
+    let config = await TestConfig.findOne();
+    if (!config || !config.isTestActive) {
+      return res.status(200).json({
+        isTestActive: false,
+        testEnded: config ? config.testEnded : false,
+        message: 'The test has not been started yet by the administrator.',
+      });
+    }
+
     let submission = await Submission.findOne({ teamId });
 
     if (submission) {
       if (submission.submitted) {
-        return res.status(403).json({ message: 'Test has already been submitted.' });
+        return res.status(200).json({
+          isTestActive: true,
+          submitted: true,
+          message: 'Test has already been submitted.',
+        });
       }
       return res.status(200).json({
+        isTestActive: true,
         message: 'Test in progress',
-        startTime: submission.startTime,
+        startTime: submission.startTime || config.testStartTime,
+        durationMinutes: config.durationMinutes || 60,
         submitted: false,
       });
     }
 
-    const startTime = new Date();
+    const startTime = config.testStartTime || new Date();
     submission = new Submission({
       teamId,
       startTime,
@@ -33,8 +50,10 @@ const startTest = async (req, res) => {
     await submission.save();
 
     return res.status(200).json({
+      isTestActive: true,
       message: 'Test started successfully',
       startTime: submission.startTime,
+      durationMinutes: config.durationMinutes || 60,
       submitted: false,
     });
   } catch (error) {
@@ -49,6 +68,11 @@ const getTestQuestions = async (req, res) => {
       return res.status(403).json({ message: 'Access denied. Team account required.' });
     }
 
+    const config = await TestConfig.findOne();
+    if (!config || !config.isTestActive) {
+      return res.status(403).json({ message: 'The test is not active yet. Please wait for the administrator.' });
+    }
+
     const questions = await Question.find().select('-correctOption').sort({ _id: 1 });
     return res.status(200).json(questions);
   } catch (error) {
@@ -56,6 +80,7 @@ const getTestQuestions = async (req, res) => {
     return res.status(500).json({ message: 'Server error fetching questions' });
   }
 };
+
 
 const submitTest = async (req, res) => {
   try {

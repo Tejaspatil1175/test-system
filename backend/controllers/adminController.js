@@ -1,7 +1,9 @@
 const bcrypt = require('bcryptjs');
 const Team = require('../models/Team');
-const Submission = require('../models/Submission');
 const Question = require('../models/Question');
+const Submission = require('../models/Submission');
+const TestConfig = require('../models/TestConfig');
+const PDFDocument = require('pdfkit');
 
 const createTeam = async (req, res) => {
   try {
@@ -301,6 +303,7 @@ const clearEntireDatabase = async (req, res) => {
     const subResult = await Submission.deleteMany({});
     const teamResult = await Team.deleteMany({});
     const questionResult = await Question.deleteMany({});
+    await TestConfig.deleteMany({});
 
     return res.status(200).json({
       message: 'System factory reset complete. All test data cleared (Admin credentials preserved).',
@@ -313,6 +316,94 @@ const clearEntireDatabase = async (req, res) => {
   } catch (error) {
     console.error('Error wiping database:', error);
     return res.status(500).json({ message: 'Server error during database reset' });
+  }
+};
+
+// Global Test Session Management
+const getTestStatus = async (req, res) => {
+  try {
+    let config = await TestConfig.findOne();
+    if (!config) {
+      config = await TestConfig.create({ isTestActive: false, durationMinutes: 60, testEnded: false });
+    }
+    return res.status(200).json(config);
+  } catch (error) {
+    console.error('Error fetching test status:', error);
+    return res.status(500).json({ message: 'Server error fetching test status' });
+  }
+};
+
+const startGlobalTest = async (req, res) => {
+  try {
+    let config = await TestConfig.findOne();
+    const startTime = new Date();
+    if (!config) {
+      config = new TestConfig({
+        isTestActive: true,
+        testStartTime: startTime,
+        durationMinutes: 60,
+        testEnded: false,
+      });
+    } else {
+      config.isTestActive = true;
+      config.testStartTime = startTime;
+      config.testEnded = false;
+      config.updatedAt = new Date();
+    }
+    await config.save();
+
+    return res.status(200).json({
+      message: 'Test started globally for all candidate teams',
+      config,
+    });
+  } catch (error) {
+    console.error('Error starting global test:', error);
+    return res.status(500).json({ message: 'Server error starting global test' });
+  }
+};
+
+const stopGlobalTest = async (req, res) => {
+  try {
+    let config = await TestConfig.findOne();
+    if (!config) {
+      config = new TestConfig({ isTestActive: false, testEnded: true });
+    } else {
+      config.isTestActive = false;
+      config.testEnded = true;
+      config.updatedAt = new Date();
+    }
+    await config.save();
+
+    return res.status(200).json({
+      message: 'Test concluded globally',
+      config,
+    });
+  } catch (error) {
+    console.error('Error stopping global test:', error);
+    return res.status(500).json({ message: 'Server error stopping global test' });
+  }
+};
+
+const resetGlobalTest = async (req, res) => {
+  try {
+    let config = await TestConfig.findOne();
+    if (!config) {
+      config = new TestConfig({ isTestActive: false, testStartTime: null, testEnded: false });
+    } else {
+      config.isTestActive = false;
+      config.testStartTime = null;
+      config.testEnded = false;
+      config.updatedAt = new Date();
+    }
+    await config.save();
+
+    return res.status(200).json({
+      message: 'Test session reset to lobby state',
+      config,
+    });
+  } catch (error) {
+    console.error('Error resetting global test:', error);
+    return res.status(500).json({ message: 'Server error resetting global test' });
   }
 };
 
@@ -330,7 +421,12 @@ module.exports = {
   clearTeams,
   clearQuestions,
   clearEntireDatabase,
+  getTestStatus,
+  startGlobalTest,
+  stopGlobalTest,
+  resetGlobalTest,
 };
+
 
 
 

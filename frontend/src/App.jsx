@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // Placeholders for Step 17 skeleton
-const AdminLogin = () => <div className="glass-card">Admin Login Placeholder</div>;
+import AdminLogin from './pages/AdminLogin';
 const AdminDashboard = () => <div className="glass-card">Admin Dashboard Placeholder</div>;
 const ManageTeams = () => <div className="glass-card">Manage Teams Placeholder</div>;
 const ManageQuestions = () => <div className="glass-card">Manage Questions Placeholder</div>;
